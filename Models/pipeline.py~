@@ -1,0 +1,79 @@
+import numpy as np
+from math import floor
+import pickle
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn import svm,naive_bayes,ensemble
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix
+import matplotlib.pyplot as plt
+from sklearn.externals import joblib
+from sklearn.feature_extraction.text import TfidfTransformer
+
+def count_vectorize_rep(all_sents):
+    count_vectorizer = CountVectorizer()
+    counts = count_vectorizer.fit_transform(all_sents)
+    return counts
+
+def get_balanced_train(counts,all_targets):
+    #to get balanced training, unbalanced test - but this isnt randomly selected
+    counts_arr = counts.toarray().tolist()
+    split_num = int(floor(len(counts_arr)*0.25))
+    x_train = counts_arr[:split_num]+counts_arr[-split_num:]
+    y_train  =  all_targets[:split_num]+all_targets[-split_num:]
+    #print ("x_train len is %d and y_train len is %d " %(len(x_train),len(y_train)))
+    x_test = counts_arr[split_num:-split_num]
+    y_test  =  all_targets[split_num:-split_num]
+    #print ("x_test len is %d and y_test len is %d " %(len(x_test),len(y_test)))
+    return x_train,y_train,x_test,y_test
+
+def evaluate_model(model,x_test,y_test):
+    #evaluating
+    predictions = model.predict(x_test)
+    acc = accuracy_score(y_test,predictions,normalize=True)
+    print "accuracy of model is %f" %acc
+
+    #confusion matrix
+    cnf_matrix = confusion_matrix(y_test, predictions)
+    print cnf_matrix
+
+def test_model(counts,all_targets,model_type,file_name):
+    x_train,y_train,x_test,y_test = get_balanced_train(counts,all_targets)
+    try:
+        model = joblib.load(file_name)
+        print ("loaded")
+    except:
+        #training
+        if model_type == "svm":
+            model = svm.SVC()
+        elif model_type == "naive_bayes":
+            model = naive_bayes.GaussianNB
+        elif model_type =="random_forest":
+            model = ensemble.RandomForestClassifier(max_depth=2, random_state=0)
+        model.fit(x_train, y_train)
+        print ("trained")
+        
+        #save
+        joblib.dump(model,file_name)
+        print ("saved")
+
+    evaluate_model(model,x_test,y_test)
+    
+def main():
+    #get list of all words
+    unlab_sents = pickle.load(open("../Preprocessing/grouped_unlab_sents_with_punct.p", "rb"))
+    lab_sents = pickle.load(open("../Preprocessing/grouped_lab_sents_with_punct.p", "rb"))
+    #want to turn each sentence thats rep as a list into a sentence rep as a string
+    all_sents_lists = unlab_sents+lab_sents
+    all_sents = []
+    for sentence in all_sents_lists:
+        sent_str = ""
+        for word in sentence:
+            sent_str = sent_str + str(word) + " "
+        all_sents.append(sent_str)
+    all_targets = [0]*len(unlab_sents) + [1]*len(lab_sents)
+
+    counts = count_vectorize_rep(all_sents) #what does this represent?
+    #tfidf_transformer = TfidfTransformer(use_idf=True).fit(counts)
+    #tfidf_counts = tfidf_transformer.transform(counts)
+    test_model(counts,all_targets,"random_forest",file_name = 'random_forest_model_count_vectorizer.p')
+main()

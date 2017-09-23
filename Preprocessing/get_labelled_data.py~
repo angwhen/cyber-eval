@@ -1,0 +1,24 @@
+import os
+#first make sure all of the files in ann+brown and annotated are the same
+#only use files that are in both
+
+def get_usable_file_names(): #rename better later
+    ann_brown_list = os.listdir("/home/angel/Documents/Research_287/MalwareTextDB/data/ann+brown")
+    annotations_list = os.listdir("/home/angel/Documents/Research_287/MalwareTextDB/data/annotations")
+
+    #from the ann_brown list remove the .txtcbn ending
+    ann_brown_list = [el.replace('.txtcbn','') for el in ann_brown_list]
+   
+    #from the annotaed list keep only files with .txt ending
+    #and remove the ending
+    annotations_list = [el for el in annotations_list if not ".ann" in el]
+    annotations_list = [el.replace('.txt','') for el in annotations_list]
+    
+    #return the file names both folders have in common
+    return list(set(ann_brown_list).union(annotations_list))
+
+def main():
+    usable_file_names  = get_usable_file_names()
+    #print ("usable file names are: %s" %str(usable_file_names))
+
+main()

@@ -1,0 +1,10 @@
+import numpy as np
+import pickle
+import sklearn.feature_extraction.txt.CounteVectorizer
+def main():
+    unlab_sents = pickle.load(open("../Preprocessing/grouped_unlab_sents_with_punct.p", "rb"))
+    lab_sents = pickle.load(open("../Preprocessing/grouped_lab_sents_with_punct.p", "rb"))
+    word_dict = pickle.load(open("../Preprocessing/grouped_lower_word_dict_with_punct.p", "rb"))
+    
+    
+main()

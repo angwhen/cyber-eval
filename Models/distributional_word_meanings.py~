@@ -1,0 +1,12 @@
+import pickle
+def main():
+    unlab_sents = pickle.load(open("../Preprocessing/grouped_unlab_sents_with_punct.p", "rb"))
+    lab_sents = pickle.load(open("../Preprocessing/grouped_lab_sents_with_punct.p", "rb"))
+    word_dict = pickle.load(open("../Preprocessing/grouped_lower_word_dict_with_punct.p", "rb"))
+    word_ind_dict = pickle.load(open("word_ind_dict_lcase.p", "rb"))
+
+    #save a dict with the vector representations of every word
+    for word in word_dict.keys():
+        
+        
+main()
