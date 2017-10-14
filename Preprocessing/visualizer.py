@@ -46,20 +46,17 @@ def get_words_dict(all_words, lower = False):
     
 def main():
     #load all words, with some words transformed to group
-    unlab_sents = pickle.load(open("grouped_unlab_sents_with_punct.p", "rb"))
-    lab_sents = pickle.load(open("grouped_lab_sents_with_punct.p", "rb"))
-    print "unlab sents: %d, lab sents: %d" %(len(unlab_sents), len(lab_sents))
-    unlab_words = [item for sublist in unlab_sents for item in sublist]
-    lab_words = [item for sublist in lab_sents for item in sublist]
-    print "unlab words: %d, lab words: %d" %(len(unlab_words), len(lab_words))
+    all_sents = pickle.load(open("grouped_all_sents_no_lemma_lcase.p", "rb"))
+  
+    all_words = [item for sublist in all_sents for item in sublist]
+    print "all words: %d" %(len(all_words))
 
-    lower = False
-    word_dict = get_words_dict(lab_words+unlab_words, lower)
-    word_dict_fname = "grouped_word_dict_with_punct.p"
-    if lower:
-        word_dict_fname = "grouped_lower_word_dict_with_punct.p"
-    pickle.dump(word_dict, open(word_dict_fname, "wb"))
-    #word_dict = pickle.load(open("grouped_word_dict_with_punct.p", "rb"))
+    lower = True
+    word_dict = get_words_dict(all_words, lower)
+    pickle.dump(word_dict, open("grouped_word_dict_no_lemma_lcase.p", "wb"))
+
+    
+    #word_dict = pickle.load(open("grouped_word_dict_no_lemma_lcase.p", "rb"))
 
     #plot_words_count(word_dict)
     #most_common_words(word_dict)

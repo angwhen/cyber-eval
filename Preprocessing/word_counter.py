@@ -115,6 +115,15 @@ def group_genhex(sents):
         new_sents.append(new_sent)
     return new_sents
 
+def to_lcase(sents):
+    new_sents = []
+    for sent in sents:
+        new_sent = []
+        for word in sent:
+            new_sent.append(word.lower())
+        new_sents.append(new_sent)
+    return new_sents
+
 def save_processed(sents,fname):
     pickle.dump(sents, open(fname,"wb"))
 
@@ -125,18 +134,20 @@ def main():
     unlab_pos = pickle.load(open("unlab_pos_with_punct.p", "rb"))
     lab_pos = pickle.load(open("lab_pos_with_punct.p", "rb"))
 
-    #processed_sents = lemmatize_sents(unlab_sents,get_simple_pos(unlab_pos))
-    processed_sents = group_num(unlab_sents,unlab_pos)
+    processed_sents = lemmatize_sents(unlab_sents,get_simple_pos(unlab_pos))
+    processed_sents = group_num(processed_sents ,unlab_pos)
     processed_sents = group_md5(processed_sents)
     processed_sents = group_doubleslash(processed_sents)
     processed_sents = group_genhex(processed_sents)
+    processed_sents = to_lcase(processed_sents)
     processed_unlab_sents = processed_sents
     
-    #processed_sents = lemmatize_sents(lab_sents,get_simple_pos(lab_pos))
-    processed_sents = group_num(lab_sents,lab_pos)
+    processed_sents = lemmatize_sents(lab_sents,get_simple_pos(lab_pos))
+    processed_sents = group_num(processed_sents,lab_pos)
     processed_sents = group_md5(processed_sents)
     processed_sents = group_doubleslash(processed_sents)
     processed_sents = group_genhex(processed_sents)
+    processed_sents = to_lcase(processed_sents)
     processed_lab_sents = processed_sents
 
     processed_sents = processed_lab_sents+processed_unlab_sents
@@ -145,8 +156,8 @@ def main():
     print "number of unique words is: %d" %num_uniqw
     print "number of words that occur only once is: %d" %num_single_occ
 
-    save_processed(processed_unlab_sents,"grouped_unlab_sents_no_lemma_with_punct.p")
-    save_processed(processed_lab_sents,"grouped_lab_sents_no_lemma_with_punct.p")
+    save_processed(processed_unlab_sents,"grouped_unlab_sents_with_lemma_lcase.p")
+    save_processed(processed_lab_sents,"grouped_lab_sents_with_lemma_lcase.p")
     
 main()
 
