@@ -6,11 +6,25 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
+from sklearn.utils import shuffle
+
 
 def get_balanced_train(counts,all_targets):
-    #to get balanced training, unbalanced test - but this isnt randomly selected
-    #counts_arr = counts.toarray().tolist()
-    counts_arr = counts.tolist()
+
+    counts,all_targets = shuffle(counts,all_targets,random_state = 0)
+    unlab_list = []
+    lab_list = []
+    for sent_vect,label in zip(counts,all_targets):
+        if label == 0:
+            unlab_list.append(sent_vect)
+        else:
+            lab_list.append(sent_vect)
+
+    counts_arr = unlab_list + lab_list
+    all_targets = [0]*len(unlab_list) + [1]*len(lab_list)
+    print type(counts_arr)
+    print type(all_targets)
+
     split_num = int(floor(len(counts_arr)*0.25))
     x_train = counts_arr[:split_num]+counts_arr[-split_num:]
     y_train  =  all_targets[:split_num]+all_targets[-split_num:]
@@ -18,6 +32,7 @@ def get_balanced_train(counts,all_targets):
     x_test = counts_arr[split_num:-split_num]
     y_test  =  all_targets[split_num:-split_num]
     print ("x_test len is %d and y_test len is %d " %(len(x_test),len(y_test)))
+    
     return np.asarray(x_train),np.asarray(y_train),np.asarray(x_test),np.asarray(y_test)
 
 
@@ -45,16 +60,23 @@ def test_model(x_train,y_train,x_test,y_test,model_type):
     #print ("trained")
 
     evaluate_model(model,x_test,y_test)
-
+    
+'''
 def get_sents_and_targets(unlab_sents,lab_sents):
     all_sents_lists = unlab_sents+lab_sents
     all_targets = [0]*len(unlab_sents) + [1]*len(lab_sents)
     return all_sents_lists,all_targets
+'''
 
 def main():
     all_sents = pickle.load(open("../Preprocessing/grouped_all_sents_with_lemma_lcase.p", "rb"))
     all_targets = pickle.load(open("../Preprocessing/all_labels.p", "rb"))
     word_dict = pickle.load(open("../Preprocessing/grouped_word_dict_with_lemma_lcase.p", "rb"))
+
+    #remove all EOF markers from sent vectors and from targets
+    all_sents = [x for x in all_sents if not (len(x) == 1 and x[0] == "$eof$")]
+    all_targets = [x for x in all_targets if x != "$EOF$"]
+
     
     word_ind_dict = {}
     index = 0
@@ -71,10 +93,6 @@ def main():
             sent_vector[word_ind_dict[word]] = sent_vector[word_ind_dict[word]]+1
         sent_vectors.append(sent_vector)
 
-    #remove all EOF markers from sent vectors and from targets
-    sent_vectors = [x for x in sent_vectors if x != ["$EOF$"]]
-    all_targets = [x for x in all_targets if x != "$EOF$"]
-    
     print "length of sent vectors after make one hot is"
     print len(sent_vectors)
     print len(sent_vectors[0])
@@ -96,5 +114,7 @@ def main():
     test_model(x_train,y_train,x_test,y_test,"random_forest")
     print "SVM"
     test_model(x_train,y_train,x_test,y_test,"svm")
-    
+
+    pickle.dump(pca_vectors, open("bow200vectors.p","wb")) #not includes eof
+        
 main()
