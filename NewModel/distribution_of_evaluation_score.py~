@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+import numpy as np
+import matplotlib.mlab as mlab
+import matplotlib.pyplot as plt
+import scipy as sp
+import scipy.stats
+
+def mean_confidence_interval(data, confidence=0.95):
+    a = 1.0*np.array(data)
+    n = len(a)
+    m, se = np.mean(a), scipy.stats.sem(a)
+    h = se * sp.stats.t._ppf((1+confidence)/2., n-1)
+    return m, m-h, m+h
+
+
+# add a 'best fit' line
+eval_score_list = [3.5522507431601347, 3.5655428072964663, 3.7809206057598912, 4.6175529918368756, 3.1359074868525347, 2.7518532448905861, 3.5299918904533198, 4.6849983584623418, 4.5736722517935728, 3.1510985809190859, 4.1498754434482414, 4.2769393396025874, 2.8552834908912188, 3.4336599965419961, 5.0140986387569635, 4.1986679386863761, 4.3967309102931802, 4.1988722870723274, 1.831224636005756, 3.7928225704420173]
+
+m, lower, upper = mean_confidence_interval(eval_score_list[:2])
+print "mean is %f, confidence interval (0.95) is (%f,%f)"%(m,lower,upper)
+plt.hist(eval_score_list, bins=5)
+
+plt.xlabel('Evaluation Score')
+plt.ylabel('Count')
+plt.grid(True)
+
+plt.show()
+
+
+
+
+

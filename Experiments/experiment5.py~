@@ -1,0 +1,64 @@
+import numpy as np
+from math import floor
+import pickle
+from sklearn import svm,naive_bayes,ensemble
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+from sklearn.utils import shuffle
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import f1_score
+from sklearn.model_selection import train_test_split
+import os
+import math
+from scipy import spatial
+import random
+import matplotlib.pyplot as plt
+from scipy.stats.stats import pearsonr
+import scipy.stats
+
+class Node(object):
+    def __init__(self,value,next_node=None):
+        self.value = value
+        self.reference = next_node
+
+class LinkedList(object):
+    def __init__(self,head_node):
+        self.head = head_node
+    def get_head(self):
+        return self.head
+    def get_next(self, curr_node):
+        return curr_node.next_node
+
+def is_eof(l):
+    if (len(l) == 1 and l[0] == "$eof$"):
+        return True
+    else:
+        False
+    
+""" methods to call from main """
+def load_base_model():
+    all_targets = pickle.load(open("../Preprocessing/all_labels.p", "rb"))
+    all_targets = [x for x in all_targets if x != "$EOF$"]
+    vectors = pickle.load(open("../Models/CV1000vectors.p","rb")) #not includes eof
+    return vectors,all_targets
+
+#gets linked list of actual sentences, not vectors
+def get_sents_as_linked_list(all_sents):
+    start = Node(all_sents[0])
+    curr = start
+    for sent in all_sents[1:]:
+        curr.reference = Node(sent)
+        curr = curr.reference
+    return LinkedList(start)
+
+def main():
+    sent_vectors,all_targets = load_base_model()
+    all_sents = pickle.load(open("../Preprocessing/grouped_all_sents_no_lemma_lcase.p", "rb"))
+    sents_ll = get_sents_as_linked_list(all_sents)
+
+    
+    
+
+main()
