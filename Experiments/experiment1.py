@@ -96,6 +96,7 @@ def get_rf_feature_importance(forest,X):
                  axis=0)
     indices = np.argsort(importances)[::-1]
 
+    pickle.dump(importances,open("curr_feature_importance.p","wb"))
     # Print the feature ranking
     print("Feature ranking:")
 
@@ -110,6 +111,7 @@ def get_rf_feature_importance(forest,X):
     plt.xticks(range(X.shape[1]), indices)
     plt.xlim([-1, X.shape[1]])
     plt.show()
+    
     
 def test_model(x_train,y_train,x_test,y_test,model_type):
     #training
@@ -179,7 +181,7 @@ def main():
     all_sents = pickle.load(open("../Preprocessing/grouped_all_sents_no_lemma_lcase.p", "rb"))
     sents_ll = get_sents_as_linked_list(all_sents)
 
-    #next_sents,curr_targets = get_next_sents(sents_ll,all_sents,sent_vectors,all_targets)
+    next_sents,curr_targets = get_next_sents(sents_ll,all_sents,sent_vectors,all_targets)
     #test_model_cyber(next_sents,curr_targets)
     test_model_cyber(sent_vectors,all_targets)
     
