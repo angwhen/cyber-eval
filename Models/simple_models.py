@@ -259,7 +259,7 @@ def count_vectorizer_with_stop_words():
     pca.fit(counts)
 
     pca_vectors = pca.transform(counts)
-    
+
     pickle.dump(pca_vectors, open("CV1000withstopvectors.p","wb")) #not includes eof
     pickle.dump(pca, open("CV1000withstopPCA.p","wb"))
     pickle.dump(count_vectorizer, open("CVwithstop.p","wb"))
@@ -348,10 +348,7 @@ def count_vectorizer_most_important(n=1000):
 def get_vector_for_sents(all_sents,fasttext_model):
     sent_vectors = []
     i = 0
-    for sentence in all_sents:
-        #print "iteration : %d" %i
-        #i = i+1
-        #print sentence 
+    for sentence in all_sents: 
         curr_words_list = []
         if (len(sentence)==0 ): #why are there even len 0 sentences
             curr_vector = [0]*100
@@ -364,63 +361,35 @@ def get_vector_for_sents(all_sents,fasttext_model):
         sent_vectors.append(curr_vector)
     return sent_vectors
 
-#from nltk.corpus import wordnet
-import nltk
-def get_weighted_vector_for_sents(all_sents,fasttext_model):
-    word_import_dict = pickle.load(open("../Experiments/word_import_dictCV1000pre2.p","rb"))
+#this version uses CV, so that words already match
+def get_weighted_vectors_better(all_sents,fasttext_model):
+    word_import_dict = pickle.load(open("../Experiments/word_import_dictCV1000withstop.p","rb"))
+    
+    count_vectorizer = pickle.load(open("CVwithstop.p","rb"))
+    vocab = count_vectorizer.vocabulary_
+    inv_map = {v: k for k, v in vocab.iteritems()}
+
     sent_vectors = []
     i = 0
     for sentence in all_sents:
-        print "iteration : %d" %i
+        print "round %d"%i
         i = i+1
-        #print sentence 
         curr_words_list = []
         if (len(sentence)==0 ): #why are there even len 0 sentences
             curr_vector = [0]*100
         else:
             for word in sentence:
-                print word,
-                print ",",
                 word_vector = fasttext_model[str(word)]
-                #multiply word vector (element wise) by the associated weight
-                #of the most similar word in word dict
-                if word in word_import_dict.keys():
-                    word_vector = np.array(word_vector)*word_import_dict[word]
-                elif word == "$xyzhex$":
-                    word_vector = np.array(word_vector)*word_import_dict["xyzhex"]
-                elif word == "$xyznum$":
-                    word_vector = np.array(word_vector)*word_import_dict["xyznum"]
-                elif word == "$xyzcountry$":
-                    word_vector = np.array(word_vector)*word_import_dict["xyzcountry"]
-                elif word == "$xyzotherfile$":
-                    word_vector = np.array(word_vector)*word_import_dict["xyzotherfile"]
-                elif word == "$xyzwebsite$":
-                    word_vector = np.array(word_vector)*word_import_dict["xyzwebsite"]
-                elif word == "$xyzdll$":
-                    word_vector = np.array(word_vector)*word_import_dict["xyzdll"]
-                elif word == "$xyzexe$":
-                    word_vector = np.array(word_vector)*word_import_dict["xyzexe"]
-                elif word == "$xyzdocx$":
-                    word_vector = np.array(word_vector)*word_import_dict["xyzdocx"]
-                elif word == "$xyzdoubleslash$":
-                    word_vector = np.array(word_vector)*word_import_dict["xyzdoubleslash"]
-                else:
-                    #most similar word
-                    most_sim_word = "NONE"
-                    max_similarity = -1000
-                    for w in word_import_dict.keys():
-                        #curr_similarity = wordnet.synsets(w)[0].wup_similarity(wordnet.synsets(word)[0])
-                        curr_similarity = nltk.edit_distance(w, word)
-                        if curr_similarity > max_similarity:
-                            max_similarity = curr_similarity
-                            most_sim_word = w
-                    word_vector = np.array(word_vector)*word_import_dict[most_sim_word]
+                
+                cv_index = vocab[word]
+                orig_word = inv_map[cv_index] #standardize the word for the dict
+                print "word was: %s, orig was is: %s" %(word,orig_word)
+                word_vector = np.array(word_vector)*word_import_dict[orig_word]
                 curr_words_list.append(word_vector)
             curr_vector = np.mean(np.array(curr_words_list),axis=0).tolist()
-        #print len(curr_vector)
         sent_vectors.append(curr_vector)
     return sent_vectors
-
+                                
 def skipgram_mod():
     import fasttext
     all_sents = pickle.load(open("../Preprocessing/grouped_all_sents_no_lemma_lcase.p", "rb"))
@@ -441,12 +410,12 @@ def skipgram_mod():
 
 def skipgram_weighted():
     import fasttext
-    all_sents = pickle.load(open("../Preprocessing/grouped2_all_sents_no_lemma_lcase.p", "rb"))
+    all_sents = pickle.load(open("../Preprocessing/grouped_all_sents_no_lemma_lcase.p", "rb"))
     all_targets = pickle.load(open("../Preprocessing/all_labels.p", "rb"))
     
     fasttext_model = fasttext.skipgram('data.txt','model')
 
-    sent_vectors = get_weighted_vector_for_sents(all_sents,fasttext_model)
+    sent_vectors = get_weighted_vectors_better(all_sents,fasttext_model)
 
     pickle.dump(sent_vectors,open("skipgram_mod_vectors.p","wb"))
         
