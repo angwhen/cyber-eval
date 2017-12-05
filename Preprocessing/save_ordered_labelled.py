@@ -57,7 +57,8 @@ def save_sentences_lists(sents):
     
     
 def main():
-    tok_dir = "/home/angel/Documents/Research_287/MalwareTextDB/data/tokenized"
+    #tok_dir = "/home/angel/Documents/Research_287/MalwareTextDB/data/tokenized"
+    tok_dir = "../../MalwareTextDB/data/tokenized"
     file_names = os.listdir(tok_dir)
     all_sentences = get_texts(tok_dir,file_names)
     save_sentences_lists(all_sentences)
