@@ -53,12 +53,12 @@ negative_indices = []
 for i in xrange(0,len(all_targets)):
     if all_targets[i] == 0:
         negative_indices.append(i)
-pickle.dump(negative_indices,open("negative_indices.p","wb"))
+#pickle.dump(negative_indices,open("negative_indices.p","wb"))
 
 negative_vectors = count_vectorizer(np.array(all_sents).take(negative_indices))
 #negative_vectors = vectors.take(negative_indices)
 
-kmeans = KMeans(n_clusters=4, random_state=0).fit(negative_vectors)
+kmeans = KMeans(n_clusters=6, random_state=0).fit(negative_vectors)
 
 multi_class_labels = []
 negative_class_index = 0
@@ -72,7 +72,7 @@ for i in xrange(0,len(all_targets)):
 print len(multi_class_labels)
 print len(all_targets)
 
-pickle.dump(multi_class_labels,open("multi_class_labels","wb"))
+pickle.dump(multi_class_labels,open("multi_class_labels_k6.p","wb"))
 
 
 
